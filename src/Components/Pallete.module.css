@@ -1,0 +1,16 @@
+.pallete{
+    display: flex;
+    gap: 20px;
+    padding-left: 20px;
+}
+
+.pallete button{
+    font-size: 20px;
+    background-color: transparent;
+    border: none;
+}
+
+.pallete button:hover{
+    transform: scale(1.2);
+    transition: transform 0.5s;
+}
