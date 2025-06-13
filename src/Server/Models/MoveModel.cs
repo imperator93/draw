@@ -1,11 +1,11 @@
 namespace Server.Models;
 
 public record Positions(
-    int x,
-    int y
+    int X,
+    int Y
 );
 
 public record MoveModel(
     bool MousePressed,
-    Positions positions
+    Positions Positions
 );

@@ -1,22 +1,14 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import style from "./App.module.css";
 import { DrawArea } from "./Components/DrawArea";
 import { Pallete } from "./Components/Pallete";
+import { GetValidJson } from "./Helpers/GetValidJson";
+
+const conString: string = "ws://localhost:5010";
+const ws = new WebSocket(conString);
 
 export const App = () => {
-  // const conString: string = "ws://localhost:5010";
-  // const wsRef = useRef<WebSocket>(new WebSocket(conString));
-  // const { current: ws } = wsRef;
-
-  // ws.addEventListener("open", () => {
-  //   console.log("connection open");
-  //   ws.send("test");
-  // });
-
-  // ws.addEventListener("message", ({ data }) => {
-  //   console.log(data);
-  //   ws.close();
-  // });
+  const [connection, setConnection] = useState(false);
   const [area, setArea] = useState<{ width: number; height: number }>({
     width: 0,
     height: 0,
@@ -25,7 +17,6 @@ export const App = () => {
     x: 0,
     y: 0,
   });
-  console.log(positions);
 
   const [mousePressed, setMousePressed] = useState(false);
   const [pallete, setPallete] = useState({
@@ -33,6 +24,17 @@ export const App = () => {
     green: 0,
     blue: 0,
   });
+
+  useEffect(() => {
+    ws.onopen = () => setConnection(true);
+    if (connection) {
+      ws.send(JSON.stringify({ ...positions, mousePressed }));
+      ws.onmessage = ({ data }) => {
+        const message = GetValidJson(data);
+        console.log(JSON.parse(message));
+      };
+    }
+  }, [positions, mousePressed, connection]);
 
   return (
     <div>

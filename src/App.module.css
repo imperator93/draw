@@ -1,4 +1,5 @@
 .main-title{
     text-align: center;
     background-color: aquamarine;
+    user-select: none;
 }

@@ -1,5 +1,8 @@
 import { useEffect, useRef, type SetStateAction } from "react";
 
+//to see how many renders... needs to be reference so it writes to the same address
+// const r = { i: 0 };
+
 export const DrawArea = ({
   area,
   setArea,
@@ -19,6 +22,12 @@ export const DrawArea = ({
   pallete: { red: number; green: number; blue: number };
   setPallete: React.Dispatch<SetStateAction<typeof pallete>>;
 }) => {
+  // console.log(r);
+  // r.i += 1;
+
+  //1000ms/30 = 33ms delay for the timeout function so 30 frames, could also set to be 16 for 60 fps
+  const framesPerSecond = 33;
+
   const canvasReff = useRef<HTMLCanvasElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
@@ -30,18 +39,12 @@ export const DrawArea = ({
 
   const handlePickColour = () => {};
 
-  //WTF TO DO HERE
-  useEffect(() => {}, []);
-
   const handleMouseOver = (event: React.MouseEvent) => {
-    const t = setTimeout(() => {
-      setPositions((prev) => ({
-        ...prev,
-        x: event.clientX,
-        y: event.clientY - 35,
-      }));
-    }, 10);
-    clearTimeout(t);
+    setPositions((prev) => ({
+      ...prev,
+      x: event.clientX,
+      y: event.clientY - 35,
+    }));
   };
 
   useEffect(() => {
@@ -51,7 +54,7 @@ export const DrawArea = ({
     listener();
     window.addEventListener("resize", listener);
     return () => window.removeEventListener("resize", listener);
-  }, []);
+  }, [setArea]);
 
   useEffect(() => {
     if (canvasReff.current) {
@@ -67,7 +70,12 @@ export const DrawArea = ({
         onMouseDown={() => setMousePressed(true)}
         onMouseUp={() => setMousePressed(false)}
         onMouseMove={(event) => {
-          handleMouseOver(event);
+          setTimeout(() => {
+            window.requestAnimationFrame(() => {
+              //
+              handleMouseOver(event);
+            });
+          }, 33);
         }}
         width={area.width}
         height={area.height}

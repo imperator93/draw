@@ -1,7 +1,4 @@
 using System.Net.WebSockets;
-using System.Text;
-using System.Text.Json;
-using Server.Models;
 
 namespace Server.Middleware;
 
@@ -16,12 +13,13 @@ public class WebsocketServer
             var ws = await context.WebSockets.AcceptWebSocketAsync();
             while (ws.State == WebSocketState.Open)
             {
-                byte[] buffer = new byte[1024];
+                byte[] buffer = new byte[64];
 
                 var result = await ws.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
                 if (result.MessageType == WebSocketMessageType.Close)
                 {
                     await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "connection closed", CancellationToken.None);
+                    return;
                 }
                 await ws.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
             }
