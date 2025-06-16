@@ -1,11 +1,11 @@
 namespace Server.Models;
 
 public record Positions(
+    bool MousePressed,
     int X,
     int Y
 );
-
-public record MoveModel(
-    bool MousePressed,
+public record WsDto(
+    string ConnectionId,
     Positions Positions
 );

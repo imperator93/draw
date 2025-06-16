@@ -1,4 +1,5 @@
 import { useEffect, useRef, type SetStateAction } from "react";
+import type { PositionsModel } from "../Models/PositionsModel";
 
 //to see how many renders... needs to be reference so it writes to the same address
 // const r = { i: 0 };
@@ -8,17 +9,13 @@ export const DrawArea = ({
   setArea,
   positions,
   setPositions,
-  mousePressed,
-  setMousePressed,
   pallete,
   setPallete,
 }: {
   area: { width: number; height: number };
   setArea: React.Dispatch<SetStateAction<typeof area>>;
-  positions: { x: number; y: number };
-  setPositions: React.Dispatch<SetStateAction<typeof positions>>;
-  mousePressed: boolean;
-  setMousePressed: React.Dispatch<SetStateAction<boolean>>;
+  positions: PositionsModel;
+  setPositions: React.Dispatch<SetStateAction<PositionsModel>>;
   pallete: { red: number; green: number; blue: number };
   setPallete: React.Dispatch<SetStateAction<typeof pallete>>;
 }) => {
@@ -32,7 +29,7 @@ export const DrawArea = ({
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const handleDraw = (ctx: CanvasRenderingContext2D) => {
-    if (mousePressed) ctx.lineTo(positions.x, positions.y);
+    if (positions.mousePressed) ctx.lineTo(positions.x, positions.y);
     else ctx.moveTo(positions.x, positions.y);
     ctx.stroke();
   };
@@ -67,8 +64,12 @@ export const DrawArea = ({
   return (
     <div ref={wrapperRef} style={{ width: "100vw" }}>
       <canvas
-        onMouseDown={() => setMousePressed(true)}
-        onMouseUp={() => setMousePressed(false)}
+        onMouseDown={() =>
+          setPositions((prev) => ({ ...prev, mousePressed: true }))
+        }
+        onMouseUp={() =>
+          setPositions((prev) => ({ ...prev, mousePressed: false }))
+        }
         onMouseMove={(event) => {
           setTimeout(() => {
             window.requestAnimationFrame(() => {

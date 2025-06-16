@@ -9,6 +9,9 @@ var builder = WebApplication.CreateBuilder(args);
     {
         o.KeepAliveInterval = TimeSpan.FromMinutes(2);
     });
+
+    builder.Services.AddSingleton<WebsocketConnectionManager>();
+
     builder.Services.AddCors(o =>
     {
         o.AddDefaultPolicy(p =>

@@ -1,24 +1,27 @@
-import { useEffect, useRef, useState } from "react";
-import style from "./App.module.css";
+import { useEffect, useState } from "react";
+
 import { DrawArea } from "./Components/DrawArea";
 import { Pallete } from "./Components/Pallete";
+
 import { GetValidJson } from "./Helpers/GetValidJson";
 
-const conString: string = "ws://localhost:5010";
-const ws = new WebSocket(conString);
-
-export const App = () => {
-  const [connection, setConnection] = useState(false);
+import style from "./App.module.css";
+import type { PositionsModel } from "./Models/PositionsModel";
+export const App = ({ ws }: { ws: WebSocket }) => {
+  const [connection, setConnection] = useState<{
+    connected: boolean;
+    conId: string;
+  }>({ connected: false, conId: "" });
   const [area, setArea] = useState<{ width: number; height: number }>({
     width: 0,
     height: 0,
   });
-  const [positions, setPositions] = useState<{ x: number; y: number }>({
+  const [positions, setPositions] = useState<PositionsModel>({
+    mousePressed: false,
     x: 0,
     y: 0,
   });
 
-  const [mousePressed, setMousePressed] = useState(false);
   const [pallete, setPallete] = useState({
     red: 0,
     green: 0,
@@ -26,16 +29,15 @@ export const App = () => {
   });
 
   useEffect(() => {
-    ws.onopen = () => setConnection(true);
-    if (connection) {
-      ws.send(JSON.stringify({ ...positions, mousePressed }));
+    ws.onopen = () => setConnection((prev) => ({ ...prev, connected: true }));
+    if (connection.connected) {
+      ws.send(JSON.stringify({ ...positions }));
       ws.onmessage = ({ data }) => {
         const message = GetValidJson(data);
         console.log(JSON.parse(message));
       };
     }
-  }, [positions, mousePressed, connection]);
-
+  }, [positions, connection, ws]);
   return (
     <div>
       <h1 className={style["main-title"]}>DRAW</h1>
@@ -44,8 +46,6 @@ export const App = () => {
         setArea={setArea}
         positions={positions}
         setPositions={setPositions}
-        mousePressed={mousePressed}
-        setMousePressed={setMousePressed}
         pallete={pallete}
         setPallete={setPallete}
       />
