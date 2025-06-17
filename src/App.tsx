@@ -34,7 +34,13 @@ export const App = ({ ws }: { ws: WebSocket }) => {
       ws.send(JSON.stringify({ ...positions }));
       ws.onmessage = ({ data }) => {
         const message = GetValidJson(data);
-        console.log(JSON.parse(message));
+        //first send data then write
+        setPositions((prev) => ({
+          ...prev,
+          x: data.x,
+          y: data.y,
+          mousePressed: data.mousePressed,
+        }));
       };
     }
   }, [positions, connection, ws]);

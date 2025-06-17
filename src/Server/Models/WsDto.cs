@@ -6,6 +6,7 @@ public record Positions(
     int Y
 );
 public record WsDto(
+    string Type,
     string ConnectionId,
     Positions Positions
 );
