@@ -1,12 +1,8 @@
 namespace Server.Models;
 
-public record Positions(
-    bool MousePressed,
-    int X,
-    int Y
-);
-public record WsDto(
+public record WsDto<T>(
     string Type,
     string ConnectionId,
-    Positions Positions
+    T Positions,
+    T Message
 );
