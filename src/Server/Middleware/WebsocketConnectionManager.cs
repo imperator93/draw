@@ -19,5 +19,4 @@ public class WebsocketConnectionManager
         System.Console.WriteLine($"Connection added: {connId}");
         return connId;
     }
-
 }

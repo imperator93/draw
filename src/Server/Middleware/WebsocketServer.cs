@@ -1,7 +1,7 @@
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
+using Server.Models;
 
 namespace Server.Middleware;
 
@@ -37,19 +37,11 @@ public class WebsocketServer
 
         else await _next(context);
     }
-    //for game
     private async Task BroadcastMessages(byte[] buffer)
     {
         foreach (var s in _manager.GetSockets())
         {
             await s.Value.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
         }
-    }
-
-    //for chat
-    private async Task SendTo(byte[] buffer, string conId)
-    {
-        var json = JsonSerializer.Deserialize<dynamic>(Encoding.UTF8.GetString(buffer));
-
     }
 }
