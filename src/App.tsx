@@ -7,6 +7,7 @@ import { GetValidJson } from "./Helpers/GetValidJson";
 
 import style from "./App.module.css";
 import type { PositionsModel } from "./Models/PositionsModel";
+
 export const App = ({ ws }: { ws: WebSocket }) => {
   const [connection, setConnection] = useState<{
     connected: boolean;
@@ -29,32 +30,31 @@ export const App = ({ ws }: { ws: WebSocket }) => {
   });
 
   useEffect(() => {
-    ws.onopen = () => setConnection((prev) => ({ ...prev, connected: true }));
+    ws.onopen = () => {
+      if (!connection.connected)
+        setConnection((prev) => ({ ...prev, connected: true }));
+    };
+  }, [ws, setConnection, connection]);
+
+  const handleMouseOver = (event: React.MouseEvent) => {
+    setPositions((prev) => ({
+      ...prev,
+      x: event.clientX,
+      y: event.clientY - 35,
+    }));
+
     if (connection.connected) {
-      ws.send(JSON.stringify({ ...positions }));
-      ws.onmessage = ({ data }) => {
-        const message = GetValidJson(data);
-        //first send data then write
-        setPositions((prev) => ({
-          ...prev,
-          x: data.x,
-          y: data.y,
-          mousePressed: data.mousePressed,
-        }));
+      ws.send(JSON.stringify(positions));
+      ws.onmessage = ({ data }: { data: string }) => {
+        const message = JSON.parse(GetValidJson(data));
       };
     }
-  }, [positions, connection, ws]);
+  };
+
   return (
     <div>
       <h1 className={style["main-title"]}>DRAW</h1>
-      <DrawArea
-        area={area}
-        setArea={setArea}
-        positions={positions}
-        setPositions={setPositions}
-        pallete={pallete}
-        setPallete={setPallete}
-      />
+      <DrawArea ws={ws} />
       <Pallete />
     </div>
   );

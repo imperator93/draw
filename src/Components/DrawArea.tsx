@@ -1,24 +1,11 @@
 import { useEffect, useRef, type SetStateAction } from "react";
 import type { PositionsModel } from "../Models/PositionsModel";
+import type { WsDto } from "../Models/WsDto";
 
 //to see how many renders... needs to be reference so it writes to the same address
 // const r = { i: 0 };
 
-export const DrawArea = ({
-  area,
-  setArea,
-  positions,
-  setPositions,
-  pallete,
-  setPallete,
-}: {
-  area: { width: number; height: number };
-  setArea: React.Dispatch<SetStateAction<typeof area>>;
-  positions: PositionsModel;
-  setPositions: React.Dispatch<SetStateAction<PositionsModel>>;
-  pallete: { red: number; green: number; blue: number };
-  setPallete: React.Dispatch<SetStateAction<typeof pallete>>;
-}) => {
+export const DrawArea = ({ ws }: { ws: WebSocket }) => {
   // console.log(r);
   // r.i += 1;
 
@@ -28,13 +15,21 @@ export const DrawArea = ({
   const canvasReff = useRef<HTMLCanvasElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  const handleDraw = (ctx: CanvasRenderingContext2D) => {
-    if (positions.mousePressed) ctx.lineTo(positions.x, positions.y);
-    else ctx.moveTo(positions.x, positions.y);
-    ctx.stroke();
-  };
+  const [area, setArea] = useState<{ width: number; height: number }>({
+    width: 0,
+    height: 0,
+  });
+  const [positions, setPositions] = useState<PositionsModel>({
+    mousePressed: false,
+    x: 0,
+    y: 0,
+  });
 
-  const handlePickColour = () => {};
+  const [pallete, setPallete] = useState({
+    red: 0,
+    green: 0,
+    blue: 0,
+  });
 
   const handleMouseOver = (event: React.MouseEvent) => {
     setPositions((prev) => ({
@@ -42,7 +37,22 @@ export const DrawArea = ({
       x: event.clientX,
       y: event.clientY - 35,
     }));
+
+    if (connection.connected) {
+      ws.send(JSON.stringify(positions));
+      ws.onmessage = ({ data }: { data: string }) => {
+        const message = JSON.parse(GetValidJson(data));
+      };
+    }
   };
+
+  const handleDraw = (ctx: CanvasRenderingContext2D) => {
+    if (positions.mousePressed) ctx.lineTo(positions.x, positions.y);
+    else ctx.moveTo(positions.x, positions.y);
+    ctx.stroke();
+  };
+
+  const handlePickColour = () => {};
 
   useEffect(() => {
     const listener = () => {
@@ -76,7 +86,7 @@ export const DrawArea = ({
               //
               handleMouseOver(event);
             });
-          }, 33);
+          }, framesPerSecond);
         }}
         width={area.width}
         height={area.height}
