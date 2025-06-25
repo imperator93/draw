@@ -23,14 +23,16 @@ public class WebsocketServer
         {
             while (ws.State == WebSocketState.Open)
             {
-                byte[] buffer = new byte[64];
+                byte[] buffer = new byte[128];
 
                 var result = await ws.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+
                 if (result.MessageType == WebSocketMessageType.Close)
                 {
                     await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "connection closed", CancellationToken.None);
                     return;
                 }
+
                 await BroadcastMessages(buffer);
             }
         }

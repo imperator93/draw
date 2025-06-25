@@ -1,0 +1,6 @@
+.chat-area-container {
+    z-index: 999;
+    width: 200px;
+    height: 100%;
+    background: red;
+}
