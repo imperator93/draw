@@ -16,7 +16,7 @@ public class WebsocketConnectionManager
     {
         string connId = Guid.NewGuid().ToString();
         _sockets.TryAdd(connId, socket);
-        System.Console.WriteLine($"Connection added: {connId}");
+        System.Console.WriteLine($"Connection added: {connId} \n Length: {_sockets.Count}");
         return connId;
     }
 }

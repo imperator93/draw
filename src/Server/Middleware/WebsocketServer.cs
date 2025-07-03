@@ -1,7 +1,6 @@
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
-using Server.Models;
 
 namespace Server.Middleware;
 
@@ -29,8 +28,7 @@ public class WebsocketServer
 
                 if (result.MessageType == WebSocketMessageType.Close)
                 {
-                    await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "connection closed", CancellationToken.None);
-                    return;
+
                 }
 
                 await BroadcastMessages(buffer);
@@ -43,7 +41,18 @@ public class WebsocketServer
     {
         foreach (var s in _manager.GetSockets())
         {
-            await s.Value.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
+            if (s.Value.State == WebSocketState.Open)
+                await s.Value.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
         }
+    }
+
+    private async Task HandleClose(WebSocketReceiveResult wsResult, byte[] buffer)
+    {
+        var message = JsonSerializer.Deserialize<dynamic>(Encoding.UTF8.GetString(buffer));
+
+        _manager.GetSockets().TryRemove(message!.Type, out WebSocket socket);
+
+        if (socket != null)
+            await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "connection closed", CancellationToken.None);
     }
 }
